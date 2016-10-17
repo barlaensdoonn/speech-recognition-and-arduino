@@ -19,11 +19,14 @@ NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE); // NewPing setup of pins and
 
 unsigned int pingSpeed = 50; // How frequently are we going to send out a ping (in milliseconds). 50ms would be 20 times a second.
 unsigned long pingTimer;     // Holds the next ping time.
+unsigned long doorOpen = 0;
 int distance = 0;
 int gratePin = 13;
+int incoming;
 
-unsigned long doorOpen = 0;
+
 boolean grateState = false;
+boolean handshake = false;
 
 void setup() {
   Serial.begin(115200); // Open serial monitor at 115200 baud to see ping results.
@@ -49,13 +52,20 @@ void loop() {
 
   if (distance <= 25 && !grateState){
     grateState = true;
-    doorOpen = millis() + 1000;
+    //doorOpen = millis() + 1000;
     Serial.write('1');
     digitalWrite(gratePin, HIGH);
   }
-  else if ((grateState) && millis()>=doorOpen){
-    digitalWrite(gratePin, LOW);
-    grateState = false;
+  else if (grateState){
+    if (Serial.available() > 0){
+      incoming = Serial.read();
+      if (incoming == '0'){
+        digitalWrite(gratePin, LOW);
+        grateState = false;
+
+        //add door opening here
+      }
+    }
   }
   
 }
