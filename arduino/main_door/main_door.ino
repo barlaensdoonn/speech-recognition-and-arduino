@@ -19,14 +19,20 @@ NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE); // NewPing setup of pins and
 
 unsigned int pingSpeed = 50; // How frequently are we going to send out a ping (in milliseconds). 50ms would be 20 times a second.
 unsigned long pingTimer;     // Holds the next ping time.
-unsigned long doorOpen = 0;
+unsigned long doorTimer = 0;
+unsigned long doorOpenTime = 0;
+unsigned long doorCloseTime = 0;
+//unsigned long doorInterval = 15000;
+
 int distance = 0;
-int gratePin = 13;
 int incoming;
 
+int gratePin = 13;
+int doorPin = 5;
 
 boolean grateState = false;
-boolean handshake = false;
+boolean doorState = false;
+boolean doorOpen = false;
 
 void setup() {
   Serial.begin(115200); // Open serial monitor at 115200 baud to see ping results.
@@ -36,7 +42,9 @@ void setup() {
 
   pingTimer = millis(); // Start now.
   pinMode(gratePin, OUTPUT);
+  pinMode(doorPin, OUTPUT);
   digitalWrite(gratePin, LOW);
+  digitalWrite(doorPin, LOW);
 }
 
 void loop() {
@@ -50,9 +58,9 @@ void loop() {
 //  Serial.print(distance);
 //  Serial.println("cm");
 
-  if (distance <= 25 && !grateState){
+  if (distance <= 25 && (!grateState) && (!doorState)){
     grateState = true;
-    //doorOpen = millis() + 1000;
+    //doorTimer = millis() + 1000;
     Serial.write('1');
     digitalWrite(gratePin, HIGH);
   }
@@ -62,11 +70,30 @@ void loop() {
       if (incoming == '0'){
         digitalWrite(gratePin, LOW);
         grateState = false;
-
-        //add door opening here
+        //doorState = true;
       }
     }
   }
+//  else if (doorState){
+//    digitalWrite(doorPin, HIGH);
+//    digitalWrite(doorPin, LOW);
+//  }
+//    if ((millis() >= doorTimer) && (!doorOpen)){
+//      doorTimer = millis() + 16000;
+//      doorOpenTime = millis() + 1000;
+//      doorCloseTime = millis() + 11000;
+//    }
+//    else if ((millis() >= doorOpenTime) && (!doorOpen)){
+//      digitalWrite(doorPin, HIGH);
+//      doorOpen = true;
+//    }
+//    else if ((millis() >= doorCloseTime) && (doorOpen)){
+//      digitalWrite(doorPin, LOW);
+//    }
+//    else if ((millis() >= doorTimer) && (doorOpen)){
+//      doorOpen = false;
+//      doorState = false;
+//    }
   
 }
 
