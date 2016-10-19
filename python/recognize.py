@@ -9,7 +9,7 @@ import time
 
 ser = serial.Serial()
 ser.baudrate = 115200
-ser.port = "/dev/cu.usbserial-A603UY7D"
+ser.port = "/dev/cu.usbmodem1421"
 
 r = sr.Recognizer()
 r.operation_timeout = 30
@@ -39,12 +39,8 @@ def recognize():
 
     if audio:
         try:
-            # for testing purposes, we're just using the default API key
-            # to use another API key, use `r.recognize_google(audio, key="GOOGLE_SPEECH_RECOGNITION_API_KEY")`
-            # instead of `r.recognize_google(audio)`
             recognized = r.recognize_sphinx(audio)
             print("Sphinx thinks you said: {}".format(recognized))
-            # os.system("say '{}'".format(recognized))
             subprocess.run(["say", "-v", "Vicki", "{}".format(recognized)], stdout=subprocess.DEVNULL)
         except sr.UnknownValueError:
             subprocess.run(["say", "-v", "Vicki", "{}".format("Sorry, I did not understand")], stdout=subprocess.DEVNULL)
@@ -55,11 +51,15 @@ def recognize():
 if __name__ == '__main__':
     connect()
 
-    incoming = ser.read()
-    if incoming == b'1':
-        subprocess.run(["say", "-v", "Vicki", "{}".format("grate triggered")], stdout=subprocess.DEVNULL)
-        recognize()
-        time.sleep(2)
-        ser.write(b"0")
-    else:
-        subprocess.run(["say", "-v", "Vicki", "{}".format("what is that")], stdout=subprocess.DEVNULL)
+    while True:
+        try:
+            incoming = ser.read()
+            if incoming == b'1':
+                # subprocess.run(["say", "-v", "Vicki", "{}".format("grate triggered")], stdout=subprocess.DEVNULL)
+                recognize()
+                time.sleep(3) # time to wait until grate is closed
+                ser.write(b"0")
+            else:
+                ser.write(b"0")
+        except:
+            ser.write(b"0")
