@@ -38,7 +38,7 @@ bool doorOpen = false;
 
 
 void setup() {
-  Serial.begin(115200);
+  // Serial.begin(115200);
   
   pinMode(gratePin, OUTPUT);
   pinMode(doorPin, OUTPUT);
